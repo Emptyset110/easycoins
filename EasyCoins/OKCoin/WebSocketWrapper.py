@@ -153,15 +153,15 @@ class OKWebSocketBase(websocket.WebSocketApp):
         time.sleep(2)
         self.run_in_thread()
 
-    #####################################################################################################
-    # We call state_snapshot() to save the critical variables used to restore the states after restarting.
-    #
-    # reset_state() is called soon after state_snapshot(), because we need the indicators (such as "has_login")
-    # shows the correct currenct state of the okws.
-    #
-    # resume_state() is called "on open", as soon as the websocket is connected
-    #
-    #####################################################################################################
+    #############################################################################################################
+    # We call state_snapshot() to save the critical variables used to restore the states after restarting.      #
+    #                                                                                                           #
+    # reset_state() is called soon after state_snapshot(), because we need the indicators (such as "has_login") #
+    # shows the correct currenct state of the okws.                                                             #
+    #                                                                                                           #
+    # resume_state() is called "on open", as soon as the websocket is connected                                 #
+    #                                                                                                           #
+    #############################################################################################################
     def state_snapshot(self):
         # TODO
         self.__state_to_be_resumed = {
@@ -229,9 +229,9 @@ class OKWebSocketBase(websocket.WebSocketApp):
         sign = hashlib.md5(data.encode("utf8")).hexdigest().upper()
         return sign
 
-    ##########################
-    # Common High Level APIs #
-    ##########################
+    ###############################
+    #   Common High Level APIs    #
+    ###############################
     def request(self, event, channel=None, parameters=None):
         data = {
             "event": event,
@@ -283,6 +283,25 @@ class OKCoinWS(OKWebSocketBase):
             api_key=api_key,
             secret_key=secret_key,
         )
+
+    def subscribe_ticker(self, x):
+        """
+        订阅行情数据
+        :param x: string: "btc", "ltc", or "eth"
+        :return:
+        """
+        channel = "ok_sub_spotcny_" + x + "_ticker"
+        self.subscribe(channel)
+
+    def subscribe_depth(self, x, y=None):
+        """
+        订阅现货市场深度
+        :param x: string: "btc", "ltc", or "eth"
+        :return:
+        """
+        channel = "ok_sub_spot_" + x + "_depth"
+        self.subscribe(channel)
+
 
 class OKExWS(OKWebSocketBase):
     def __init__(
