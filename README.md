@@ -78,5 +78,3 @@ okcoin.okcoin_ws.subscribe_ticker("btc")
 
 ## Donation
 > No. The author is so rich that he doesn't want any donation in any form ~
->
-> Surprise!
