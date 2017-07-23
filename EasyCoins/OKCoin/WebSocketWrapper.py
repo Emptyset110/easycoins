@@ -43,6 +43,10 @@ class OKWebSocketBase(websocket.WebSocketApp):
         ws.is_open = True
         ws.last_ping_tm = 0
         ws.last_pong_tm = 0
+
+        # resume states
+        ws.resume_state()
+
         if ws._on_open:
             ws._on_open(ws)
 
@@ -54,9 +58,11 @@ class OKWebSocketBase(websocket.WebSocketApp):
         """
         ws.logger.debug("on close")
         ws.is_open = False
+        ws.state_snapshot()
+        ws.clear_state()
+
         if ws._on_close:
             ws._on_close(ws)
-
         if ws._auto_reconnect == True:
             threading.Thread(target=ws.restart, daemon=True).start()
 
@@ -65,6 +71,15 @@ class OKWebSocketBase(websocket.WebSocketApp):
         if msg == '{"event":"pong"}':
             ws.on_pong(ws)
         else:
+            # 我们要看一下msg内容，以判断如何分发
+            msg = json.loads(msg)
+            if isinstance(msg, list) and len(msg) == 1:
+                if msg[0]["channel"] == "addChannel" and msg[0]["data"]["result"]==True:
+                    ws.on_add_channel(channel_name=msg[0]["data"]["channel"])
+                elif msg[0]["channel"] == "removeChannel" and msg[0]["data"]["result"]==True:
+                    ws.on_remove_channel(channel_name=msg[0]["data"]["channel"])
+                elif msg[0]["channel"] == "login" and msg[0]["data"]["result"]=='true':
+                    ws.on_login()
             if ws._on_message:
                 ws._on_message(ws, msg)
             else:
@@ -83,11 +98,26 @@ class OKWebSocketBase(websocket.WebSocketApp):
         if ws._on_pong:
             ws._on_pong(ws)
 
-    def __on_add_channel(self, channel_name):
-        pass
+    def on_add_channel(self, channel_name):
+        if channel_name not in self.subscribed_channels:
+            self.subscribed_channels.append(channel_name)
+            self.logger.debug("{} on_add_channel".format(self.name))
+            return True
+        return False
 
-    def __on_remove_channel(self):
-        pass
+    def on_remove_channel(self, channel_name):
+        if channel_name in self.subscribed_channels:
+            self.subscribed_channels.pop(
+                i=self.subscribed_channels.index(channel_name)
+            )
+            self.logger.debug("{} on_remove_channel".format(self.name))
+            return True
+        else:
+            return False
+
+    def on_login(self):
+        self.logger.debug("{} on login".format(self.name))
+        self.has_login = True
 
     def __init__(
             self,
@@ -136,7 +166,10 @@ class OKWebSocketBase(websocket.WebSocketApp):
 
         self.has_login = False
         self.subscribed_channels = list()
-        self.__state_to_be_resumed = dict() # this dict stores
+        self.__state_to_be_resumed = dict(
+            has_login=self.has_login,
+            subscribed_channels=list()
+        )     # this dict stores critical variables for web socket to resume states after restarting
         self.use_log(logger=logger, logger_name=self._name)
 
     @property
@@ -161,28 +194,31 @@ class OKWebSocketBase(websocket.WebSocketApp):
     #############################################################################################################
     # We call state_snapshot() to save the critical variables used to restore the states after restarting.      #
     #                                                                                                           #
-    # reset_state() is called soon after state_snapshot(), because we need the indicators (such as "has_login") #
+    # clear_state() is called soon after state_snapshot(), because we need the indicators (such as "has_login") #
     # shows the correct currenct state of the okws.                                                             #
     #                                                                                                           #
     # resume_state() is called "on open", as soon as the websocket is connected                                 #
     #                                                                                                           #
     #############################################################################################################
     def state_snapshot(self):
-        # TODO
-        self.__state_to_be_resumed = {
-            "channels": self.subscribed_channels,
-            "has_login": self.has_login,
-        }
+        import copy
+        self.__state_to_be_resumed = dict(
+            has_login=self.has_login,
+            subscribed_channels=copy.copy(self.subscribed_channels)
+        )
+        self.logger.debug("{}: __state_to_be_resumed - {}".format(self.name, self.__state_to_be_resumed))
 
-    def reset_state(self):
-        # TODO
-        # subscribed channels
-        # has_login
-        pass
+    def clear_state(self):
+        self.has_login = False
+        self.subscribed_channels = list()
 
     def resume_state(self):
-        # TODO
-        pass
+        self.logger.debug("{} call resume_state".format(self.name))
+        if self.__state_to_be_resumed["has_login"] == True and self.has_login == False:
+            self.logger.debug("Resume Login.")
+            self.login()
+        for channel in self.__state_to_be_resumed["subscribed_channels"]:
+            self.subscribe(channel)
 
     def set_api_key(self, api_key, secret_key):
         self._api_key = {"api_key": api_key, "secret_key": secret_key}
@@ -346,6 +382,15 @@ class OKCoinWS(OKWebSocketBase):
         :return:
         """
         channel = "ok_sub_spotcny_" + x + "_trades"
+        self.subscribe(channel)
+
+    def subscribe_kline(self, x, period):
+        """
+        :param x: btc, ltc, eth
+        :param y: 1min, 3min, 5min, 15min, 30min, 1hour, 2hour, 4hour, 6hour, 12hour, day, 3day, week
+        :return:
+        """
+        channel = "ok_sub_spotcny_{}_kline_{}".format(x, period)
         self.subscribe(channel)
 
 

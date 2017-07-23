@@ -36,14 +36,14 @@ okcoin_ws.set_api_key(api_key_okcoin["api_key"], api_key_okcoin["secret_key"])
 okcoin_ws.login()
 
 
-# 测试重复订阅
+# # 测试重复订阅
 okcoin_ws.subscribe_depth("btc")    # 相当于okcoin_ws.subscribe("ok_sub_spotcny_btc_depth")
 okcoin_ws.subscribe_depth("btc")    # 重复订阅这个接口会收到两次全息推送，但是之后推送的变化盘口不会有重复
 time.sleep(2)
 okcoin_ws.unsubscribe("ok_sub_spotcny_btc_depth")   # 只需要removeChannel一次即可取消订阅
 
-
-
+time.sleep(15)
+okcoin_ws.close()
 
 while True:
     time.sleep(10)
