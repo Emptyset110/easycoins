@@ -46,7 +46,15 @@ okcoin_ws.login()
 # okcoin_ws.close()                   # 测试断线后恢复订阅登录状态
 
 # 下单接口
-okcoin_ws.trade(trade_action="sell", symbol="btc_cny", price="20000", amount="0.0199")
+# okcoin_ws.trade(trade_action="sell", symbol="btc_cny", amount="20000", volume="0.0199")
+# okcoin_ws.cancel_order(symbol="btc_cny", order_id="8947482356")
+# okcoin_ws.cancel_order(symbol="btc_cny", order_id="8947547979")
+
+# 查询订单信息
+okcoin_ws.get_order_info(symbol="btc_cny", order_id="8947547979")
+
+# 查询用户信息
+okcoin_ws.get_user_info()
 
 while True:
     time.sleep(10)

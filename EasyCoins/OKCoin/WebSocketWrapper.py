@@ -394,26 +394,99 @@ class OKCoinWS(OKWebSocketBase):
         channel = "ok_sub_spotcny_{}_kline_{}".format(x, period)
         self.subscribe(channel)
 
-    def trade(self, trade_action='', symbol='', price='', amount=''):
+    def get_user_info(self):
         """
 
-        :param trade_action:
-        :param symbol:
-        :param price:
-        :param amount:
         :return:
         """
+        channel = "ok_spotcny_userinfo"
         self.request(
             event="addChannel",
-            channel="ok_spotcny_trade",
+            channel=channel,
+            parameters={
+                'api_key': self.api_key
+            }
+        )
+        return True
+
+    def get_order_info(self, symbol='', order_id=''):
+        """
+        @:param symbol: btc_cny, ltc_cny, eth_cny
+        @:param order_id
+        :return:
+        """
+        channel = "ok_spotcny_orderinfo"
+        self.request(
+            event="addChannel",
+            channel=channel,
+            parameters={
+                'api_key': self.api_key,
+                'symbol': symbol,
+                'order_id': order_id
+            }
+        )
+
+    def trade(self, trade_action='', symbol='', amount='', volume=''):
+        """
+        IMPORTANT! 由于作者认为官方接口提供的字段名容易引起歧义，
+        这个python接口对字段名字重新进行了定义，并给出解释
+        :param trade_action: buy/sell/buy_market/sell_market
+        :param symbol:
+        :param amount: 消耗总金额(RMB)，对应官方文档中的price字段，但是这个数值不是单价，不是单价，不是单价，重要的事情说三遍
+         所以python接口用amount来命名，代表总金额。
+        :param volume: 购买比特币的数量，官方文档中是amount字段，这里用volume来代替
+        :return:
+        """
+        parameters = None
+        if trade_action in ["buy", "sell"]:     # 限价单
             parameters={
                 'api_key': self.api_key,
                 'symbol': symbol,
                 'type': trade_action,
-                'price': str(price),
-                'amount': str(amount)
+                'price': str(amount),
+                'amount': str(volume)
             }
+        elif trade_action == "buy_market":
+            parameters={
+                'api_key': self.api_key,
+                'symbol': symbol,
+                'type': trade_action,
+                'amount': str(amount)           # 市价买只需要填写想要消耗的CNY数量，无需填写比特币数量
+            }
+        elif trade_action == "sell_market":     # 市价卖只需要填写想要卖出比特币的数量，不需要填写金额
+            parameters={
+                'api_key': self.api_key,
+                'symbol': symbol,
+                'type': trade_action,
+                'amount': str(volume)
+            }
+        if parameters:
+            self.request(
+                event="addChannel",
+                channel="ok_spotcny_trade",
+                parameters=parameters
+            )
+            return True
+        else:
+            return False
+
+    def cancel_order(self, symbol, order_id="-1"):
+        """
+
+        :param symbol:
+        :return:
+        """
+        parameters = {
+            'api_key': self.api_key,
+            'symbol': symbol,
+            'order_id': order_id
+        }
+        self.request(
+            event="addChannel",
+            channel="ok_spotcny_cancel_order",
+            parameters=parameters
         )
+        return True
 
 
 class OKExWS(OKWebSocketBase):
