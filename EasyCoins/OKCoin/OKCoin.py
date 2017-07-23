@@ -19,7 +19,7 @@ class OKCoin:
 
     @property
     def okex_ws(self):
-        if self._okex_ws is not None:
+        if self._okex_ws is None:
             return self.create_okex_ws()
         else:
             return self._okex_ws

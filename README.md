@@ -36,14 +36,14 @@ okcoin = OKCoin()
 okcoin.okcoin_ws.start()
 okcoin.okcoin_ws.subscribe_ticker("btc")
 ```
-If you are familiar with `logging`, you can write your own. Otherwise, try
+If you are familiar with `logging`, you can write your own logging handlers. Otherwise, try
 the following full example:
 ```
 
 """
 We set the logging level to be DEBUG, so that we can see what's going on inside.
 In production environment, you can set the logging level to INFO, or even WARNING
-"""
+"""python
 import logging
 # Set Screen Output handler
 formatter = logging.Formatter(
@@ -61,6 +61,11 @@ from EasyCoins import OKCoin
 okcoin = OKCoin()
 okcoin.okcoin_ws.start()
 okcoin.okcoin_ws.subscribe_ticker("btc")
+
+# The main thread needs to be "joined". Otherwise, the WebSocket will be closed as the main thread exits.
+import time
+while okcoin.okcoin_ws._auto_reconnect or okcoin.okcoin_ws.is_open:
+    time.sleep(60)
 ```
 
 ## Introduction for trading platforms

@@ -515,3 +515,121 @@ class OKExWS(OKWebSocketBase):
             api_key=api_key,
             secret_key=secret_key,
         )
+
+    def subscribe_ticker(self, x, contract_type):
+        """
+
+        :param x: btc, ltc
+        :param contract_type: this_week, next_week, quarter
+        :return:
+        """
+        channel = 'ok_sub_future_' + x + '_ticker_' + contract_type
+        self.subscribe(channel)
+
+    def subscribe_kline(self, x, contract_type, period):
+        """
+
+        :param x:
+        :param contract_type:
+        :param period:
+        :return:
+        """
+        channel = "ok_sub_future_" + x + "_kline_" + contract_type + "_" + period
+        self.subscribe(channel)
+
+    def subscribe_depth(self, x, contract_type, depth):
+        """
+
+        :param x:
+        :param contract_type:
+        :param depth: full/20/60
+        :return:
+        """
+        if depth == "full":
+            channel = "ok_sub_future_{}_depth_{}_usd".format(x, contract_type)
+        else:
+            channel = "ok_sub_future_{}_depth_{}_{}".format(x, contract_type, depth)
+        self.subscribe(channel)
+
+    def subscribe_trade(self, x, contract_type):
+        """
+        :param x: btc, ltc
+        :param contract_type:
+        :return:
+        """
+        channel = "ok_sub_futureusd_{}_trade_{}".format(x, contract_type)
+        self.subscribe(channel)
+
+    def subscribe_index(self, x):
+        """
+
+        :param x: btc, ltc
+        :return:
+        """
+        channel = "ok_sub_futureusd_{}_index".format(x)
+        self.subscribe(channel)
+
+    def subscribe_delivery_price_forcast(self, x):
+        """
+        Deprecated: This does not need to be subscribed and will be automatically returned 1 hour prior to delivery.
+        :param x: btc, ltc
+        :return:
+        """
+        channel = "{}_forecast_price".format(x)
+        self.subscribe(channel)
+
+    ###################
+    # Trade Related   #
+    ###################
+    def trade(self, symbol, contract_type, price, volume, order_type, match_price, lever_rate):
+        """
+        :param symbol:
+        :param contract_type:
+        :param price:
+        :param volume:
+        :param order_type:
+        :param match_price:
+        :param lever_rate:
+        :return:
+        """
+        # TODO UnitTest
+
+        parameters={
+            'api_key': self.api_key,
+            'symbol': symbol,
+            'contract_type': contract_type,
+            'price': str(price),
+            'amount': str(volume),
+            'type': str(order_type),
+            'match_price': str(match_price),
+            'lever_rate': str(lever_rate)
+        }
+        self.request(
+            event="addChannel",
+            channel="ok_futureusd_trade",
+            parameters=parameters
+        )
+
+    def long(self, symbol, contract_type, price, volume, match_price, lever_rate=10):
+        """
+        A wrapper for self.trade() method.
+        """
+        self.trade(symbol, contract_type, price, volume, "1", match_price, lever_rate)
+
+    def short(self, symbol, contract_type, price, volume, match_price, lever_rate=10):
+        """
+        A wrapper for self.trade() method.
+        """
+        self.trade(symbol, contract_type, price, volume, "2", match_price, lever_rate)
+
+    def sell(self, symbol, contract_type, price, volume, match_price, lever_rate=10):
+        """
+        A wrapper for self.trade() method.
+        """
+        self.trade(symbol, contract_type, price, volume, "3", match_price, lever_rate)
+
+    def cover(self, symbol, contract_type, price, volume, match_price, lever_rate=10):
+        """
+        A wrapper for self.trade() method.
+        """
+        self.trade(symbol, contract_type, price, volume, "4", match_price, lever_rate)

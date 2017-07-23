@@ -40,8 +40,11 @@ You can save them in a json file, and load them in your code.
 > we defined a `OKWebSocketBase`, which is a sub-class of WebSocket and
 > a base class for `OKExWS` and `OKCoinWS`.
 >
-> In `OKWebSocketBase`, the instance is designed to auto-reconnect as soon as the WebSocket is closed,
-> as well as resuming the subscribed channels and login status, so that API users DO NOT NEED TO WORRY about the connection while calling methods.
+> In `OKWebSocketBase`, a "ping/pong" mechanism is built-in according to the official documentation,
+> so the connection will be kept alive.
+> It is also designed to automatically reconnect as soon as the WebSocket is closed,
+> as well as resuming the subscribed channels and login status.
+> So the API users DO NOT NEED TO WORRY about the connection while calling methods.
 >
 > Some commonly used high level methods are defined in `OKWebSocketBase` such as
 > `subscribe`, `request` so that even if this repository is not updated

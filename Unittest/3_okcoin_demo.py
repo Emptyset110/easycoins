@@ -34,13 +34,31 @@ logger.addHandler(handler)
 
 okcoin = OKCoin()
 
-okcoin.okcoin_ws.start()
+# okcoin.okcoin_ws.start()
+okcoin.okex_ws.start()
 
 # 设置api_key, secret_key并登录
 from Unittest.account import get_api_key
-api_key_okcoin = get_api_key("api_key_okcoin.json")
-okcoin.okcoin_ws.set_api_key(api_key_okcoin["api_key"], api_key_okcoin["secret_key"])
-okcoin.okcoin_ws.login()
+# api_key_okcoin = get_api_key("api_key_okcoin.json")
+# okcoin.okcoin_ws.set_api_key(api_key_okcoin["api_key"], api_key_okcoin["secret_key"])
+# okcoin.okcoin_ws.login()
+api_key_okex = get_api_key("api_key_okex.json")
+okcoin.okex_ws.set_api_key(api_key_okex["api_key"], api_key_okex["secret_key"])
+okcoin.okex_ws.login()
+
+# okcoin.okex_ws.subscribe_ticker("btc", "this_week")
+
+# okcoin.okex_ws.trade(
+#     symbol="btc_usd",
+#     contract_type="this_week",
+#     price="2700",
+#     volume="1",
+#     order_type="1",
+#     match_price="1",
+#     lever_rate="10"
+# )
+
+help(okcoin)
 
 while True:
     time.sleep(30)
