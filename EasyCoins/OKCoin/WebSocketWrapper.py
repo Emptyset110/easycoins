@@ -25,7 +25,7 @@ class OKWebSocketBase(websocket.WebSocketApp):
                 except Exception:
                     print("没有安装dHydra, 使用默认log设置")
                     import logging
-                    self.logger = logging.getLogger(self.name)
+                    self.logger = logging.getLogger(logger_name)
         else:
             self.logger = logger
 
@@ -83,6 +83,12 @@ class OKWebSocketBase(websocket.WebSocketApp):
         if ws._on_pong:
             ws._on_pong(ws)
 
+    def __on_add_channel(self, channel_name):
+        pass
+
+    def __on_remove_channel(self):
+        pass
+
     def __init__(
             self,
             name,
@@ -131,8 +137,7 @@ class OKWebSocketBase(websocket.WebSocketApp):
         self.has_login = False
         self.subscribed_channels = list()
         self.__state_to_be_resumed = dict() # this dict stores
-
-        self.use_log(logger=logger)
+        self.use_log(logger=logger, logger_name=self._name)
 
     @property
     def api_key(self):
@@ -232,6 +237,22 @@ class OKWebSocketBase(websocket.WebSocketApp):
     ###############################
     #   Common High Level APIs    #
     ###############################
+    def start(self, timeout=3):
+        """
+        开启并等待直到websocket on_open完成
+        :param timeout: 连接超时秒数，超时会raise TimeoutError
+        :return:
+        """
+        self.run_in_thread()
+        s = time.time()
+        while self.is_open == False:
+            if time.time() - s > timeout:
+                self.logger.error("{} 连接超时".format(self.name))
+                raise TimeoutError("{} 连接超时".format(self.name))
+            time.sleep(0.1)
+        return True
+
+
     def request(self, event, channel=None, parameters=None):
         data = {
             "event": event,
@@ -260,6 +281,7 @@ class OKWebSocketBase(websocket.WebSocketApp):
 
 class OKCoinWS(OKWebSocketBase):
     def __init__(
+            self,
             name="OKCoinWS",
             url="wss://real.okcoin.cn:10440/websocket/okcoinapi",
             on_open=None,
@@ -295,16 +317,41 @@ class OKCoinWS(OKWebSocketBase):
 
     def subscribe_depth(self, x, y=None):
         """
-        订阅现货市场深度
+        订阅现货市场深度行情（类似n档挂单/全息盘口）
+        y=20即20档盘口，y=60即60档盘口
+
+        y=None则推送盘口变化（第一条会返回一个全息盘口，此后最快大约每50毫秒会有一次推送。官方文档说是200增量更新）
         :param x: string: "btc", "ltc", or "eth"
+        :param y: 20/60/None, None by default
+        :return:
+        官方文档使用描述:
+	        1，第一次返回全量数据
+	        2，根据接下来数据对第一次返回数据进行，如下操作
+	            删除（量为0时）
+	            修改（价格相同量不同）
+	            增加（价格不存在）
+            bids([string, string]):买方深度
+            asks([string, string]):卖方深度
+            timestamp(string):服务器时间戳
+        """
+        if y is None:
+            channel = "ok_sub_spot_" + x + "_depth"
+        else:
+            channel = "ok_sub_spot_" + x + "_depth" + "_" + str(y)
+        self.subscribe(channel)
+
+    def subscribe_trades(self, x,):
+        """
+        订阅逐笔成交明细
         :return:
         """
-        channel = "ok_sub_spot_" + x + "_depth"
+        channel = "ok_sub_spotcny_" + x + "_trades"
         self.subscribe(channel)
 
 
 class OKExWS(OKWebSocketBase):
     def __init__(
+            self,
             name="OKExWS",
             url="wss://real.okex.com:10440/websocket/okcoinapi",
             on_open=None,

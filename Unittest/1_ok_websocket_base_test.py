@@ -55,25 +55,19 @@ api_key_okcoin = get_api_key("api_key_okcoin.json")
 okex_ws.set_api_key(api_key_okex["api_key"], api_key_okex["secret_key"])
 okcoin_ws.set_api_key(api_key_okcoin["api_key"], api_key_okcoin["secret_key"])
 
-# 开启Websocket
-okcoin_ws.run_in_thread()
-okex_ws.run_in_thread()
-
-# 等待两个Websocket都连接好
-while okcoin_ws.is_open == False:
-    time.sleep(0.5)
-
-while okex_ws.is_open == False:
-    time.sleep(0.5)
+# 开启并连接到Websocket
+okcoin_ws.start()
+okex_ws.start()
 
 # 调用登录
 okcoin_ws.login()
 okex_ws.login()
 
-# 尝试订阅两个行情接口
+# 测试订阅两个行情接口
 # okex_ws.subscribe("ok_sub_futureusd_btc_ticker_next_week")
 # okex_ws.subscribe("ok_sub_futureusd_btc_ticker_this_week")
-okcoin_ws.subscribe("ok_sub_spotcny_btc_depth_60")
+
+
 
 while True:
     time.sleep(20)
