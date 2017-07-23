@@ -57,9 +57,10 @@ class OKWebSocketBase(websocket.WebSocketApp):
         :return:
         """
         ws.logger.debug("on close")
-        ws.is_open = False
-        ws.state_snapshot()
-        ws.clear_state()
+        if ws.is_open:
+            ws.is_open = False
+            ws.state_snapshot()
+            ws.clear_state()
 
         if ws._on_close:
             ws._on_close(ws)
@@ -392,6 +393,27 @@ class OKCoinWS(OKWebSocketBase):
         """
         channel = "ok_sub_spotcny_{}_kline_{}".format(x, period)
         self.subscribe(channel)
+
+    def trade(self, trade_action='', symbol='', price='', amount=''):
+        """
+
+        :param trade_action:
+        :param symbol:
+        :param price:
+        :param amount:
+        :return:
+        """
+        self.request(
+            event="addChannel",
+            channel="ok_spotcny_trade",
+            parameters={
+                'api_key': self.api_key,
+                'symbol': symbol,
+                'type': trade_action,
+                'price': str(price),
+                'amount': str(amount)
+            }
+        )
 
 
 class OKExWS(OKWebSocketBase):

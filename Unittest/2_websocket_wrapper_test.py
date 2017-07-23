@@ -37,13 +37,16 @@ okcoin_ws.login()
 
 
 # # 测试重复订阅
-okcoin_ws.subscribe_depth("btc")    # 相当于okcoin_ws.subscribe("ok_sub_spotcny_btc_depth")
-okcoin_ws.subscribe_depth("btc")    # 重复订阅这个接口会收到两次全息推送，但是之后推送的变化盘口不会有重复
-time.sleep(2)
-okcoin_ws.unsubscribe("ok_sub_spotcny_btc_depth")   # 只需要removeChannel一次即可取消订阅
+# okcoin_ws.subscribe_depth("btc")    # 相当于okcoin_ws.subscribe("ok_sub_spotcny_btc_depth")
+# okcoin_ws.subscribe_depth("btc")    # 重复订阅这个接口会收到两次全息推送，但是之后推送的变化盘口不会有重复
+# time.sleep(2)
+# okcoin_ws.unsubscribe("ok_sub_spotcny_btc_depth")   # 只需要removeChannel一次即可取消订阅
 
-time.sleep(15)
-okcoin_ws.close()
+# time.sleep(15)
+# okcoin_ws.close()                   # 测试断线后恢复订阅登录状态
+
+# 下单接口
+okcoin_ws.trade(trade_action="sell", symbol="btc_cny", price="20000", amount="0.0199")
 
 while True:
     time.sleep(10)
