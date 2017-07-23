@@ -36,6 +36,32 @@ okcoin = OKCoin()
 okcoin.okcoin_ws.start()
 okcoin.okcoin_ws.subscribe_ticker("btc")
 ```
+If you are familiar with `logging`, you can write your own. Otherwise, try
+the following full example:
+```
+
+"""
+We set the logging level to be DEBUG, so that we can see what's going on inside.
+In production environment, you can set the logging level to INFO, or even WARNING
+"""
+import logging
+# Set Screen Output handler
+formatter = logging.Formatter(
+    '[%(levelname)s] %(asctime)s - %(name)s - %(lineno)d - %(message)s'
+)
+
+logger = logging.getLogger("OKCoinWS")
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+from EasyCoins import OKCoin
+
+okcoin = OKCoin()
+okcoin.okcoin_ws.start()
+okcoin.okcoin_ws.subscribe_ticker("btc")
+```
 
 ## Introduction for trading platforms
 > - OKCoin
