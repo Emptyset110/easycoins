@@ -4,6 +4,8 @@ import os
 sys.path.append(os.path.dirname(sys.path[0]))
 # 将到上一层路径加入sys.path以便正常测试import
 from EasyCoins import PoloniexWebSocket
+import time
+import json
 
 """
 将logging设置为DEBUG，用于调试，生产环境可以设置为INFO甚至WARNING
@@ -23,3 +25,9 @@ logger.addHandler(handler)
 
 poloniex_ws = PoloniexWebSocket()
 poloniex_ws.start()
+# poloniex_ws.send(json.dumps({'command': 'subscribe', 'channel': 1000, 'userID': 11368077}))
+poloniex_ws.send(json.dumps({'command': 'subscribe', 'channel': 1001})) #
+poloniex_ws.send(json.dumps({'command': 'subscribe', 'channel': 1002})) # ticker
+poloniex_ws.send(json.dumps({'command': 'subscribe', 'channel': 1003}))
+while True:
+    time.sleep(30)
