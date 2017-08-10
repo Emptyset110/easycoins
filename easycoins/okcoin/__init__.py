@@ -1,0 +1,1 @@
+from ._okcoin_ws_error_msg import _okcoin_ws_error_msg
