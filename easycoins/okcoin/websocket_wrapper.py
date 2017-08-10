@@ -102,16 +102,16 @@ class OKWebSocketBase(websocket.WebSocketApp):
     def on_add_channel(self, channel_name):
         if channel_name not in self.subscribed_channels:
             self.subscribed_channels.append(channel_name)
-            self.logger.debug("{} on_add_channel".format(self.name))
+            self.logger.debug("{} on_add_channel:{}".format(self.name, channel_name))
             return True
         return False
 
     def on_remove_channel(self, channel_name):
         if channel_name in self.subscribed_channels:
             self.subscribed_channels.pop(
-                i=self.subscribed_channels.index(channel_name)
+                index=self.subscribed_channels.index(channel_name)
             )
-            self.logger.debug("{} on_remove_channel".format(self.name))
+            self.logger.debug("{} on_remove_channel:{}".format(self.name, channel_name))
             return True
         else:
             return False
