@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.dirname(sys.path[0]))
 # 将到上一层路径加入sys.path以便正常测试import
 
-from EasyCoins import OKCoin, OKCoinWS
+from easycoins import OKCoin, OKCoinWS
 import time
 import logging
 

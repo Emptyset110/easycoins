@@ -30,7 +30,7 @@ The following prerequisites is required
 >
 
 ```python
-from EasyCoins import OKCoin
+from easycoins import OKCoin
 
 okcoin = OKCoin()
 okcoin.okcoin_ws.start()
