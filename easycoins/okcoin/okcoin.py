@@ -1,5 +1,5 @@
 # coding: utf-8
-from .WebSocketWrapper import OKExWS, OKCoinWS
+from .websocket_wrapper import OKExWS, OKCoinWS
 
 class WebSocketExistsException(BaseException):
     def __init__(self, class_name, name):

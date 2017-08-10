@@ -5,6 +5,6 @@ easycoins/okcoin/__init__.py
 easycoins/okcoin/_okcoin_ws_error_msg.py
 easycoins/okcoin/okcoin.py
 easycoins/okcoin/websocket_wrapper.py
-easycoins/poloniex/Poloniex.py
-easycoins/poloniex/WebSocketWrapper.py
 easycoins/poloniex/__init__.py
+easycoins/poloniex/poloniex.py
+easycoins/poloniex/websocket_wrapper.py
